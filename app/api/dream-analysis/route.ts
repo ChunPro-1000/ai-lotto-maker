@@ -23,6 +23,7 @@ const analysisSchema = z.object({
     })
   ).min(1).describe('동양사상 기반 분류 항목들'),
   story: z.string().min(50).max(500).describe('동양 판타지 소설 형식으로 재구성한 꿈 이야기 (300자 이내)'),
+  greekMythStory: z.string().min(100).max(500).describe('꿈과 가장 유사한 상황의 그리스 신화 이야기를 재미있게 구성 (500자 이내)'),
   dreamNumbers: z.array(
     z.number().min(1).max(45)
   ).min(2).max(5).describe('꿈에서 추출한 상징 숫자들 (1-45 범위, 2-5개)'),
@@ -59,11 +60,11 @@ export async function POST(request: NextRequest) {
     const { dreamText, birthYear, birthMonthDay, birthTime, gender } = body;
 
     // 입력 검증
-    if (!dreamText || dreamText.trim().length < 30) {
+    if (!dreamText || dreamText.trim().length < 20) {
       return NextResponse.json<DreamAnalysisResponse>(
         {
           success: false,
-          error: '꿈 내용은 최소 30자 이상 입력해주세요.',
+          error: '꿈 내용은 최소 20자 이상 입력해주세요.',
         },
         { status: 400 }
       );
@@ -116,6 +117,13 @@ export async function POST(request: NextRequest) {
 - 간단한 분석 이유 (50자 이내)
 
 또한 이 꿈을 동양 판타지 소설 형식으로 300자 이내로 재구성해주세요. 권선징악적 교훈이 포함되어야 합니다.
+**중요: 이야기에 적절한 이모티콘을 자연스럽게 포함해주세요. 예를 들어 물/바다(🌊), 불/태양(🔥), 하늘/구름(☁️), 동물(🐉🐍🦅), 보물/금(💎✨), 꽃(🌸), 별(⭐) 등 꿈의 내용에 맞는 이모티콘을 사용하세요.**
+
+**그리스 신화 스토리 생성**
+이 꿈과 가장 유사한 상황의 그리스 신화 이야기를 재미있게 구성해주세요 (300자 이내).
+꿈의 핵심 요소(상황, 감정, 상징 등)를 그리스 신화의 인물과 사건에 비유하여 흥미롭게 재구성하세요.
+예를 들어, 꿈에 물이 나오면 포세이돈🌊, 불이 나오면 프로메테우스🔥, 동물이 나오면 해당 동물과 관련된 신화 등을 참고하세요.
+**중요: 이야기에 적절한 이모티콘을 자연스럽게 포함해주세요. 예를 들어 신들(⚡👑), 바다(🌊), 불(🔥), 번개(⚡), 올리브(🫒), 황금사과(🍎), 독수리(🦅), 뱀(🐍), 말(🐴), 꽃(🌺), 별(⭐) 등 그리스 신화의 요소에 맞는 이모티콘을 사용하세요.**
 
 **중요: 꿈에서 숫자 상징 추출**
 꿈의 내용을 분석하여 동양사상과 수리상징에 기반한 숫자 2-5개를 추출해주세요 (1-45 범위).
@@ -295,6 +303,7 @@ ${dreamText}`;
 
     // 스토리 추출
     const story = analysisResult.story || '꿈의 내용을 분석하여 신비로운 이야기로 재구성했습니다.';
+    const greekMythStory = analysisResult.greekMythStory || '꿈의 내용을 그리스 신화로 재구성했습니다.';
 
     // AI가 추출한 꿈 숫자 사용 (없으면 기존 로직 사용)
     const aiDreamNumbers = analysisResult.dreamNumbers || [];
@@ -314,6 +323,7 @@ ${dreamText}`;
       data: {
         classifications,
         story,
+        greekMythStory,
         lottoNumbers: numbers,
         numberExplanations: explanations,
       },

@@ -28,6 +28,7 @@ export interface ClassificationItem {
 export interface DreamAnalysisResult {
   classifications: ClassificationItem[];
   story: string; // AI가 생성한 판타지 스토리
+  greekMythStory: string; // AI가 생성한 그리스 신화 스토리
   lottoNumbers: number[]; // 생성된 로또 번호 6개
   numberExplanations: string[]; // 각 번호에 대한 설명
 }

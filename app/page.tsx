@@ -20,48 +20,9 @@ export default function Home() {
   const [result, setResult] = useState<DreamAnalysisResult | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [currentDate, setCurrentDate] = useState<string>("");
-  const [titleAnimationComplete, setTitleAnimationComplete] = useState(false);
-  const [descAnimationComplete, setDescAnimationComplete] = useState(false);
 
   // 예시 텍스트
   const dreamExampleText = "어둠속 우물에서 빛나는 뱀과 마주했는데 푸른 빛의 옥구슬을 받는 꿈을 꿨어";
-
-  // 애니메이션 variants 메모이제이션
-  const titleVariants = useMemo(() => ({
-    hidden: { 
-      opacity: 0, 
-      scale: 0,
-      y: -30,
-      rotate: -180,
-    },
-    visible: { 
-      opacity: 1, 
-      scale: 1,
-      y: 0,
-      rotate: 0,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 20,
-      },
-    },
-  }), []);
-
-  const descVariants = useMemo(() => ({
-    hidden: { 
-      opacity: 0, 
-      scale: 0,
-    },
-    visible: { 
-      opacity: 1, 
-      scale: 1,
-      transition: {
-        type: "spring",
-        stiffness: 200,
-        damping: 15,
-      },
-    },
-  }), []);
 
   // 제목 텍스트 메모이제이션
   const titleText = useMemo(() => "AI 꿈해석 로또 번호 추천기", []);
@@ -478,134 +439,43 @@ export default function Home() {
                 <CardTitle className="relative z-10 text-2xl md:text-3xl lg:text-4xl font-black leading-tight tracking-tight mb-2">
                   <div 
                     className="flex flex-wrap justify-center items-center gap-1 md:gap-2"
-                    style={{ isolation: 'isolate', willChange: titleAnimationComplete ? 'auto' : 'transform' }}
+                    style={{ isolation: 'isolate' }}
                   >
-                    {titleAnimationComplete ? (
-                      // 애니메이션 완료 후 정적 렌더링
-                      titleText.split("").map((char, index) => {
-                        const { currentColor, nextColor } = titleCharColors[index];
-                        return (
-                          <span
-                            key={`title-char-static-${index}`}
-                            className="inline-block drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]"
-                            style={{
-                              background: `linear-gradient(135deg, ${currentColor}, ${nextColor})`,
-                              WebkitBackgroundClip: 'text',
-                              WebkitTextFillColor: 'transparent',
-                              backgroundClip: 'text',
-                              filter: 'brightness(1.2) saturate(1.3)',
-                              transform: 'translateZ(0)',
-                            }}
-                          >
-                            {char === " " ? "\u00A0" : char}
-                          </span>
-                        );
-                      })
-                    ) : (
-                      // 애니메이션 중
-                      <motion.div
-                        className="flex flex-wrap justify-center items-center gap-1 md:gap-2"
-                        initial="hidden"
-                        animate="visible"
-                        onAnimationComplete={() => {
-                          if (!titleAnimationComplete) {
-                            setTimeout(() => setTitleAnimationComplete(true), 100);
-                          }
-                        }}
-                        layout={false}
-                        variants={{
-                          visible: {
-                            transition: {
-                              staggerChildren: 0.08,
-                            },
-                          },
-                        }}
-                      >
-                        {titleText.split("").map((char, index) => {
-                          const { currentColor, nextColor } = titleCharColors[index];
-                          return (
-                            <motion.span
-                              key={`title-char-${index}`}
-                              layout={false}
-                              variants={titleVariants}
-                              whileHover={{
-                                scale: 1.4,
-                                y: -8,
-                                rotate: [0, -10, 10, -10, 0],
-                                transition: { duration: 0.3 },
-                              }}
-                              className="inline-block drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]"
-                              style={{
-                                background: `linear-gradient(135deg, ${currentColor}, ${nextColor})`,
-                                WebkitBackgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent',
-                                backgroundClip: 'text',
-                                filter: 'brightness(1.2) saturate(1.3)',
-                                willChange: 'transform',
-                              }}
-                            >
-                              {char === " " ? "\u00A0" : char}
-                            </motion.span>
-                          );
-                        })}
-                      </motion.div>
-                    )}
+                    {titleText.split("").map((char, index) => {
+                      const { currentColor, nextColor } = titleCharColors[index];
+                      return (
+                        <span
+                          key={`title-char-${index}`}
+                          className="inline-block drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]"
+                          style={{
+                            background: `linear-gradient(135deg, ${currentColor}, ${nextColor})`,
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text',
+                            filter: 'brightness(1.2) saturate(1.3)',
+                            transform: 'translateZ(0)',
+                          }}
+                        >
+                          {char === " " ? "\u00A0" : char}
+                        </span>
+                      );
+                    })}
                   </div>
                 </CardTitle>
                 <CardDescription className="relative z-10 mt-2 text-base md:text-lg font-medium">
                   <div 
                     className="flex flex-wrap justify-center items-center gap-0.5 md:gap-1"
-                    style={{ isolation: 'isolate', willChange: descAnimationComplete ? 'auto' : 'transform' }}
+                    style={{ isolation: 'isolate' }}
                   >
-                    {descAnimationComplete ? (
-                      // 애니메이션 완료 후 정적 렌더링
-                      descText.split("").map((char, index) => (
-                        <span
-                          key={`desc-char-static-${index}`}
-                          className="inline-block text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
-                          style={{ transform: 'translateZ(0)' }}
-                        >
-                          {char === " " ? "\u00A0" : char}
-                        </span>
-                      ))
-                    ) : (
-                      // 애니메이션 중
-                      <motion.div
-                        className="flex flex-wrap justify-center items-center gap-0.5 md:gap-1"
-                        initial="hidden"
-                        animate="visible"
-                        onAnimationComplete={() => {
-                          if (!descAnimationComplete) {
-                            setTimeout(() => setDescAnimationComplete(true), 100);
-                          }
-                        }}
-                        layout={false}
-                        variants={{
-                          visible: {
-                            transition: {
-                              staggerChildren: 0.05,
-                              delayChildren: 0.5,
-                            },
-                          },
-                        }}
+                    {descText.split("").map((char, index) => (
+                      <span
+                        key={`desc-char-${index}`}
+                        className="inline-block text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+                        style={{ transform: 'translateZ(0)' }}
                       >
-                        {descText.split("").map((char, index) => (
-                          <motion.span
-                            key={`desc-char-${index}`}
-                            layout={false}
-                            variants={descVariants}
-                            whileHover={{
-                              scale: 1.2,
-                              transition: { duration: 0.2 },
-                            }}
-                            className="inline-block text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
-                            style={{ willChange: 'transform' }}
-                          >
-                            {char === " " ? "\u00A0" : char}
-                          </motion.span>
-                        ))}
-                      </motion.div>
-                    )}
+                        {char === " " ? "\u00A0" : char}
+                      </span>
+                    ))}
                   </div>
                 </CardDescription>
                 <motion.p

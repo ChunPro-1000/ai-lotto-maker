@@ -74,14 +74,6 @@ export default function Home() {
         weekday: 'long'
       })
     );
-    
-    // 애니메이션이 완료된 후 상태 업데이트 (약 2초 후)
-    const timer = setTimeout(() => {
-      setTitleAnimationComplete(true);
-      setDescAnimationComplete(true);
-    }, 2000);
-    
-    return () => clearTimeout(timer);
   }, []);
 
   // 우주 별 위치 생성 (클라이언트에서만) - 성능 최적화
@@ -471,8 +463,8 @@ export default function Home() {
                 <CardTitle className="relative z-10 text-2xl md:text-3xl lg:text-4xl font-black leading-tight tracking-tight mb-2">
                   <motion.div
                     className="flex flex-wrap justify-center items-center gap-1 md:gap-2"
-                    initial="hidden"
-                    animate={titleAnimationComplete ? undefined : "visible"}
+                    initial={titleAnimationComplete ? false : "hidden"}
+                    animate="visible"
                     onAnimationComplete={() => {
                       if (!titleAnimationComplete) {
                         setTimeout(() => setTitleAnimationComplete(true), 100);
@@ -518,7 +510,6 @@ export default function Home() {
                           key={`title-char-${index}`}
                           layout={false}
                           initial={titleAnimationComplete ? false : undefined}
-                          animate={titleAnimationComplete ? undefined : undefined}
                           variants={titleVariants}
                           whileHover={{
                             scale: 1.4,
@@ -544,8 +535,8 @@ export default function Home() {
                 <CardDescription className="relative z-10 mt-2 text-base md:text-lg font-medium">
                   <motion.div
                     className="flex flex-wrap justify-center items-center gap-0.5 md:gap-1"
-                    initial="hidden"
-                    animate={descAnimationComplete ? undefined : "visible"}
+                    initial={descAnimationComplete ? false : "hidden"}
+                    animate="visible"
                     onAnimationComplete={() => {
                       if (!descAnimationComplete) {
                         setTimeout(() => setDescAnimationComplete(true), 100);
@@ -566,7 +557,6 @@ export default function Home() {
                         key={`desc-char-${index}`}
                         layout={false}
                         initial={descAnimationComplete ? false : undefined}
-                        animate={descAnimationComplete ? undefined : undefined}
                         variants={descVariants}
                         whileHover={{
                           scale: 1.2,

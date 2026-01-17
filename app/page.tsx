@@ -20,9 +20,48 @@ export default function Home() {
   const [result, setResult] = useState<DreamAnalysisResult | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [currentDate, setCurrentDate] = useState<string>("");
+  const [titleAnimationComplete, setTitleAnimationComplete] = useState(false);
+  const [descAnimationComplete, setDescAnimationComplete] = useState(false);
 
   // 예시 텍스트
   const dreamExampleText = "어둠속 우물에서 빛나는 뱀과 마주했는데 푸른 빛의 옥구슬을 받는 꿈을 꿨어";
+
+  // 애니메이션 variants 메모이제이션
+  const titleVariants = useMemo(() => ({
+    hidden: { 
+      opacity: 0, 
+      scale: 0,
+      y: -30,
+      rotate: -180,
+    },
+    visible: { 
+      opacity: 1, 
+      scale: 1,
+      y: 0,
+      rotate: 0,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 20,
+      },
+    },
+  }), []);
+
+  const descVariants = useMemo(() => ({
+    hidden: { 
+      opacity: 0, 
+      scale: 0,
+    },
+    visible: { 
+      opacity: 1, 
+      scale: 1,
+      transition: {
+        type: "spring",
+        stiffness: 200,
+        damping: 15,
+      },
+    },
+  }), []);
 
   // 클라이언트에서만 마운트 확인 및 날짜 설정
   useEffect(() => {
@@ -35,6 +74,14 @@ export default function Home() {
         weekday: 'long'
       })
     );
+    
+    // 애니메이션이 완료된 후 상태 업데이트 (약 2초 후)
+    const timer = setTimeout(() => {
+      setTitleAnimationComplete(true);
+      setDescAnimationComplete(true);
+    }, 2000);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   // 우주 별 위치 생성 (클라이언트에서만) - 성능 최적화
@@ -425,7 +472,12 @@ export default function Home() {
                   <motion.div
                     className="flex flex-wrap justify-center items-center gap-1 md:gap-2"
                     initial="hidden"
-                    animate="visible"
+                    animate={titleAnimationComplete ? undefined : "visible"}
+                    onAnimationComplete={() => {
+                      if (!titleAnimationComplete) {
+                        setTimeout(() => setTitleAnimationComplete(true), 100);
+                      }
+                    }}
                     layout={false}
                     variants={{
                       visible: {
@@ -465,25 +517,9 @@ export default function Home() {
                         <motion.span
                           key={`title-char-${index}`}
                           layout={false}
-                          variants={{
-                            hidden: { 
-                              opacity: 0, 
-                              scale: 0,
-                              y: -30,
-                              rotate: -180,
-                            },
-                            visible: { 
-                              opacity: 1, 
-                              scale: 1,
-                              y: 0,
-                              rotate: 0,
-                              transition: {
-                                type: "spring",
-                                stiffness: 300,
-                                damping: 20,
-                              },
-                            },
-                          }}
+                          initial={titleAnimationComplete ? false : undefined}
+                          animate={titleAnimationComplete ? undefined : undefined}
+                          variants={titleVariants}
                           whileHover={{
                             scale: 1.4,
                             y: -8,
@@ -509,7 +545,12 @@ export default function Home() {
                   <motion.div
                     className="flex flex-wrap justify-center items-center gap-0.5 md:gap-1"
                     initial="hidden"
-                    animate="visible"
+                    animate={descAnimationComplete ? undefined : "visible"}
+                    onAnimationComplete={() => {
+                      if (!descAnimationComplete) {
+                        setTimeout(() => setDescAnimationComplete(true), 100);
+                      }
+                    }}
                     layout={false}
                     variants={{
                       visible: {
@@ -524,21 +565,9 @@ export default function Home() {
                       <motion.span
                         key={`desc-char-${index}`}
                         layout={false}
-                        variants={{
-                          hidden: { 
-                            opacity: 0, 
-                            scale: 0,
-                          },
-                          visible: { 
-                            opacity: 1, 
-                            scale: 1,
-                            transition: {
-                              type: "spring",
-                              stiffness: 200,
-                              damping: 15,
-                            },
-                          },
-                        }}
+                        initial={descAnimationComplete ? false : undefined}
+                        animate={descAnimationComplete ? undefined : undefined}
+                        variants={descVariants}
                         whileHover={{
                           scale: 1.2,
                           transition: { duration: 0.2 },

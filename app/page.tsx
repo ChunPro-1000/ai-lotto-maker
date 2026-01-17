@@ -37,45 +37,37 @@ export default function Home() {
     );
   }, []);
 
-  // 우주 별 위치 생성 (클라이언트에서만) - 200개로 증가, 크기 2배
+  // 우주 별 위치 생성 (클라이언트에서만) - 성능 최적화
   const starPositions = useMemo(() => {
     if (!isMounted) return [];
-    return Array.from({ length: 200 }, () => ({
+    return Array.from({ length: 100 }, () => ({
       left: Math.random() * 100,
       top: Math.random() * 100,
-      size: (Math.random() * 4 + 2) * 2, // 4-12px (2배 증가)
-      duration: 0.5 + Math.random() * 2, // 더 빠른 반짝임
-      delay: Math.random() * 2,
-      opacity: Math.random() * 0.6 + 0.4, // 0.4-1.0 (더 밝게)
-      x: (Math.random() - 0.5) * 100, // 이동 거리 추가
-      y: (Math.random() - 0.5) * 100,
+      size: Math.random() * 2 + 1, // 1-3px
+      duration: 1 + Math.random() * 3,
+      delay: Math.random() * 3,
+      opacity: Math.random() * 0.5 + 0.3, // 0.3-0.8
     }));
   }, [isMounted]);
 
-  // 행성 위치 생성 (클라이언트에서만) - 10개로 증가, 크기 2배
+  // 행성 위치 생성 (클라이언트에서만) - 성능 최적화
   const planetPositions = useMemo(() => {
     if (!isMounted) return [];
-    return Array.from({ length: 10 }, () => ({
+    return Array.from({ length: 5 }, () => ({
       left: Math.random() * 100,
       top: Math.random() * 100,
-      size: (Math.random() * 80 + 40) * 2, // 80-240px (2배 증가)
+      size: Math.random() * 80 + 40, // 40-120px
       color: [
-        'rgba(139, 69, 19, 0.5)', // 갈색 행성 (더 진하게)
-        'rgba(255, 140, 0, 0.4)', // 주황 행성
-        'rgba(0, 191, 255, 0.4)', // 파란 행성
-        'rgba(147, 112, 219, 0.4)', // 보라 행성
-        'rgba(255, 20, 147, 0.4)', // 분홍 행성
-        'rgba(255, 215, 0, 0.4)', // 금색 행성
-        'rgba(50, 205, 50, 0.4)', // 연두 행성
-        'rgba(255, 69, 0, 0.4)', // 빨강-주황 행성
-        'rgba(138, 43, 226, 0.4)', // 보라-파랑 행성
-        'rgba(255, 192, 203, 0.4)', // 핑크 행성
-      ][Math.floor(Math.random() * 10)],
-      duration: 10 + Math.random() * 20, // 10-30초 (더 빠르게)
-      delay: Math.random() * 3,
-      x: (Math.random() - 0.5) * 400, // 이동 거리 2배 증가
-      y: (Math.random() - 0.5) * 400,
-      rotation: Math.random() * 360, // 회전 추가
+        'rgba(139, 69, 19, 0.3)', // 갈색 행성
+        'rgba(255, 140, 0, 0.2)', // 주황 행성
+        'rgba(0, 191, 255, 0.2)', // 파란 행성
+        'rgba(147, 112, 219, 0.2)', // 보라 행성
+        'rgba(255, 20, 147, 0.2)', // 분홍 행성
+      ][Math.floor(Math.random() * 5)],
+      duration: 20 + Math.random() * 30, // 20-50초
+      delay: Math.random() * 5,
+      x: (Math.random() - 0.5) * 200, // 이동 거리
+      y: (Math.random() - 0.5) * 200,
     }));
   }, [isMounted]);
 
@@ -245,7 +237,7 @@ export default function Home() {
         {/* 우주 배경 그라데이션 */}
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-indigo-950 via-purple-950 to-slate-900" />
         
-        {/* 별들 - 반짝이는 효과 + 이동 */}
+        {/* 별들 - 반짝이는 효과 */}
         {isMounted && starPositions.map((star, i) => (
           <motion.div
             key={`star-${i}`}
@@ -256,13 +248,11 @@ export default function Home() {
               width: `${star.size}px`,
               height: `${star.size}px`,
               backgroundColor: 'white',
-              boxShadow: `0 0 ${star.size * 3}px white, 0 0 ${star.size * 6}px rgba(255,255,255,0.5), 0 0 ${star.size * 10}px rgba(255,255,255,0.3)`,
+              boxShadow: `0 0 ${star.size * 2}px white, 0 0 ${star.size * 4}px white`,
             }}
             animate={{
-              opacity: [star.opacity * 0.3, star.opacity, star.opacity * 0.3],
-              scale: [0.6, 1.4, 0.6],
-              x: [0, star.x, 0],
-              y: [0, star.y, 0],
+              opacity: [star.opacity * 0.5, star.opacity, star.opacity * 0.5],
+              scale: [0.8, 1.2, 0.8],
             }}
             transition={{
               duration: star.duration,
@@ -273,7 +263,7 @@ export default function Home() {
           />
         ))}
         
-        {/* 행성들 - 다이나믹하게 움직이는 효과 */}
+        {/* 행성들 - 천천히 움직이는 효과 */}
         {isMounted && planetPositions.map((planet, i) => (
           <motion.div
             key={`planet-${i}`}
@@ -284,14 +274,13 @@ export default function Home() {
               width: `${planet.size}px`,
               height: `${planet.size}px`,
               backgroundColor: planet.color,
-              boxShadow: `0 0 ${planet.size * 1.5}px ${planet.color}, 0 0 ${planet.size * 3}px ${planet.color}`,
+              boxShadow: `0 0 ${planet.size}px ${planet.color}`,
             }}
             animate={{
-              x: [0, planet.x, planet.x * 0.5, 0],
-              y: [0, planet.y, planet.y * 0.5, 0],
-              opacity: [0.3, 0.6, 0.5, 0.3],
-              scale: [0.9, 1.2, 1.1, 0.9],
-              rotate: [0, planet.rotation, planet.rotation * 2, 0],
+              x: [0, planet.x, 0],
+              y: [0, planet.y, 0],
+              opacity: [0.2, 0.4, 0.2],
+              scale: [1, 1.1, 1],
             }}
             transition={{
               duration: planet.duration,
@@ -302,42 +291,40 @@ export default function Home() {
           />
         ))}
         
-        {/* 은하수 효과 - 더 밝고 넓게 */}
+        {/* 은하수 효과 */}
         <motion.div
-          className="absolute top-1/4 left-0 w-full h-2 bg-gradient-to-r from-transparent via-white/20 to-transparent blur-3xl"
+          className="absolute top-1/4 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/10 to-transparent blur-2xl"
           animate={{
-            opacity: [0.3, 0.6, 0.3],
-            scaleY: [1, 2, 1],
-            x: [-50, 50, -50],
+            opacity: [0.2, 0.4, 0.2],
+            scaleY: [1, 1.5, 1],
           }}
           transition={{
-            duration: 15,
+            duration: 8,
             repeat: Infinity,
             ease: "easeInOut",
           }}
         />
         
-        {/* 별똥별 효과 - 더 많이, 더 밝게 */}
-        {isMounted && Array.from({ length: 5 }).map((_, i) => (
+        {/* 별똥별 효과 (가끔 나타나는) */}
+        {isMounted && Array.from({ length: 3 }).map((_, i) => (
           <motion.div
             key={`shooting-${i}`}
-            className="absolute w-2 h-32 bg-gradient-to-b from-white via-yellow-200 to-transparent"
+            className="absolute w-1 h-20 bg-gradient-to-b from-white to-transparent"
             style={{
-              left: `${15 + i * 20}%`,
-              top: `${5 + i * 15}%`,
+              left: `${20 + i * 30}%`,
+              top: `${10 + i * 20}%`,
               transform: 'rotate(45deg)',
-              boxShadow: '0 0 10px white, 0 0 20px rgba(255,255,255,0.5)',
             }}
             animate={{
-              x: [0, 800],
-              y: [0, 800],
-              opacity: [0, 1, 0.8, 0],
+              x: [0, 500],
+              y: [0, 500],
+              opacity: [0, 1, 0],
             }}
             transition={{
-              duration: 1.5,
+              duration: 2,
               repeat: Infinity,
-              delay: i * 2,
-              repeatDelay: 3,
+              delay: i * 3,
+              repeatDelay: 5,
               ease: "easeOut",
             }}
           />

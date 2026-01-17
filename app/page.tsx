@@ -252,9 +252,9 @@ export default function Home() {
         {/* 우주 배경 그라데이션 */}
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-indigo-950 via-purple-950 to-slate-900" />
         
-        {/* 별들 - 반짝이는 효과 */}
+        {/* 별들 - 정적 표시 */}
         {isMounted && starPositions.map((star, i) => (
-          <motion.div
+          <div
             key={`star-${i}`}
             className="absolute rounded-full"
             style={{
@@ -264,23 +264,14 @@ export default function Home() {
               height: `${star.size}px`,
               backgroundColor: 'white',
               boxShadow: `0 0 ${star.size * 2}px white, 0 0 ${star.size * 4}px white`,
-            }}
-            animate={{
-              opacity: [star.opacity * 0.5, star.opacity, star.opacity * 0.5],
-              scale: [0.8, 1.2, 0.8],
-            }}
-            transition={{
-              duration: star.duration,
-              repeat: Infinity,
-              delay: star.delay,
-              ease: "easeInOut",
+              opacity: star.opacity,
             }}
           />
         ))}
         
-        {/* 행성들 - 천천히 움직이는 효과 */}
+        {/* 행성들 - 정적 표시 */}
         {isMounted && planetPositions.map((planet, i) => (
-          <motion.div
+          <div
             key={`planet-${i}`}
             className="absolute rounded-full blur-xl"
             style={{
@@ -290,57 +281,29 @@ export default function Home() {
               height: `${planet.size}px`,
               backgroundColor: planet.color,
               boxShadow: `0 0 ${planet.size}px ${planet.color}`,
-            }}
-            animate={{
-              x: [0, planet.x, 0],
-              y: [0, planet.y, 0],
-              opacity: [0.2, 0.4, 0.2],
-              scale: [1, 1.1, 1],
-            }}
-            transition={{
-              duration: planet.duration,
-              repeat: Infinity,
-              delay: planet.delay,
-              ease: "easeInOut",
+              opacity: 0.3,
             }}
           />
         ))}
         
-        {/* 은하수 효과 */}
-        <motion.div
+        {/* 은하수 효과 - 정적 표시 */}
+        <div
           className="absolute top-1/4 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/10 to-transparent blur-2xl"
-          animate={{
-            opacity: [0.2, 0.4, 0.2],
-            scaleY: [1, 1.5, 1],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
+          style={{
+            opacity: 0.3,
           }}
         />
         
-        {/* 별똥별 효과 (가끔 나타나는) */}
+        {/* 별똥별 효과 - 정적 표시 */}
         {isMounted && Array.from({ length: 3 }).map((_, i) => (
-          <motion.div
+          <div
             key={`shooting-${i}`}
             className="absolute w-1 h-20 bg-gradient-to-b from-white to-transparent"
             style={{
               left: `${20 + i * 30}%`,
               top: `${10 + i * 20}%`,
               transform: 'rotate(45deg)',
-            }}
-            animate={{
-              x: [0, 500],
-              y: [0, 500],
-              opacity: [0, 1, 0],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              delay: i * 3,
-              repeatDelay: 5,
-              ease: "easeOut",
+              opacity: 0.3,
             }}
           />
         ))}
@@ -370,28 +333,20 @@ export default function Home() {
               {/* 헤더 배경 - 보라색 그라데이션 */}
               <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-purple-500 to-purple-600" />
               
-              {/* 별 장식 */}
+              {/* 별 장식 - 정적 표시 */}
               <div className="absolute inset-0 opacity-20">
                 {isMounted && headerStarPositions.map((star, i) => (
-                  <motion.div
+                  <div
                     key={i}
                     className="absolute"
                     style={{
                       left: `${star.left}%`,
                       top: `${star.top}%`,
-                    }}
-                    animate={{
-                      opacity: [0.2, 0.6, 0.2],
-                      scale: [0.5, 1, 0.5],
-                    }}
-                    transition={{
-                      duration: star.duration,
-                      repeat: Infinity,
-                      delay: star.delay,
+                      opacity: 0.4,
                     }}
                   >
                     <Star className="h-3 w-3 text-white fill-white/40" />
-                  </motion.div>
+                  </div>
                 ))}
               </div>
               
@@ -864,28 +819,20 @@ export default function Home() {
                   {/* 헤더 배경 - 보라색 그라데이션 */}
                   <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-purple-500 to-purple-600" />
                   
-                  {/* 별 장식 */}
+                  {/* 별 장식 - 정적 표시 */}
                   <div className="absolute inset-0 opacity-20">
                     {isMounted && headerStarPositions.map((star, i) => (
-                      <motion.div
+                      <div
                         key={i}
                         className="absolute"
                         style={{
                           left: `${star.left}%`,
                           top: `${star.top}%`,
-                        }}
-                        animate={{
-                          opacity: [0.2, 0.6, 0.2],
-                          scale: [0.5, 1, 0.5],
-                        }}
-                        transition={{
-                          duration: star.duration,
-                          repeat: Infinity,
-                          delay: star.delay,
+                          opacity: 0.4,
                         }}
                       >
                         <Star className="h-3 w-3 text-white fill-white/40" />
-                      </motion.div>
+                      </div>
                     ))}
                   </div>
                   

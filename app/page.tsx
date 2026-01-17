@@ -426,6 +426,7 @@ export default function Home() {
                     className="flex flex-wrap justify-center items-center gap-1 md:gap-2"
                     initial="hidden"
                     animate="visible"
+                    layout={false}
                     variants={{
                       visible: {
                         transition: {
@@ -462,7 +463,8 @@ export default function Home() {
                       
                       return (
                         <motion.span
-                          key={index}
+                          key={`title-char-${index}`}
+                          layout={false}
                           variants={{
                             hidden: { 
                               opacity: 0, 
@@ -508,6 +510,7 @@ export default function Home() {
                     className="flex flex-wrap justify-center items-center gap-0.5 md:gap-1"
                     initial="hidden"
                     animate="visible"
+                    layout={false}
                     variants={{
                       visible: {
                         transition: {
@@ -519,7 +522,8 @@ export default function Home() {
                   >
                     {"당신의 운세와 꿈을 분석해서 행운으로 돌려드립니다~!".split("").map((char, index) => (
                       <motion.span
-                        key={index}
+                        key={`desc-char-${index}`}
+                        layout={false}
                         variants={{
                           hidden: { 
                             opacity: 0, 

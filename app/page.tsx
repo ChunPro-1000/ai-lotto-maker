@@ -63,6 +63,21 @@ export default function Home() {
     },
   }), []);
 
+  // 제목 텍스트 메모이제이션
+  const titleText = useMemo(() => "AI 꿈해석 로또 번호 추천기", []);
+  const descText = useMemo(() => "당신의 운세와 꿈을 분석해서 행운으로 돌려드립니다~!", []);
+  
+  // 제목 글자별 색상 메모이제이션
+  const titleCharColors = useMemo(() => {
+    return titleText.split("").map((_, index) => {
+      const totalChars = titleText.length;
+      const hue = (index / totalChars) * 360;
+      const currentColor = `hsl(${hue}, 100%, 60%)`;
+      const nextColor = `hsl(${(hue + 30) % 360}, 100%, 60%)`;
+      return { currentColor, nextColor };
+    });
+  }, [titleText]);
+
   // 클라이언트에서만 마운트 확인 및 날짜 설정
   useEffect(() => {
     setIsMounted(true);
@@ -461,113 +476,137 @@ export default function Home() {
                 </motion.div>
                 
                 <CardTitle className="relative z-10 text-2xl md:text-3xl lg:text-4xl font-black leading-tight tracking-tight mb-2">
-                  <motion.div
+                  <div 
                     className="flex flex-wrap justify-center items-center gap-1 md:gap-2"
-                    initial={titleAnimationComplete ? false : "hidden"}
-                    animate="visible"
-                    onAnimationComplete={() => {
-                      if (!titleAnimationComplete) {
-                        setTimeout(() => setTitleAnimationComplete(true), 100);
-                      }
-                    }}
-                    layout={false}
-                    variants={{
-                      visible: {
-                        transition: {
-                          staggerChildren: 0.08,
-                        },
-                      },
-                    }}
+                    style={{ isolation: 'isolate', willChange: titleAnimationComplete ? 'auto' : 'transform' }}
                   >
-                    {"AI 꿈해석 로또 번호 추천기".split("").map((char, index) => {
-                      // 무지개 색상 배열 (더 부드러운 전환을 위해 더 많은 색상)
-                      const rainbowColors = [
-                        '#FF0000', // 빨강
-                        '#FF4500', // 주황빨강
-                        '#FF7F00', // 주황
-                        '#FFA500', // 오렌지
-                        '#FFD700', // 금색
-                        '#FFFF00', // 노랑
-                        '#ADFF2F', // 연두
-                        '#00FF00', // 초록
-                        '#00CED1', // 청록
-                        '#00BFFF', // 하늘색
-                        '#0000FF', // 파랑
-                        '#4169E1', // 로얄블루
-                        '#4B0082', // 남색
-                        '#8A2BE2', // 블루바이올렛
-                        '#9400D3', // 보라
-                        '#FF1493', // 딥핑크
-                        '#FF69B4', // 핑크
-                      ];
-                      const totalChars = "AI 꿈해석 로또 번호 추천기".length;
-                      const hue = (index / totalChars) * 360;
-                      const currentColor = `hsl(${hue}, 100%, 60%)`;
-                      const nextColor = `hsl(${(hue + 30) % 360}, 100%, 60%)`;
-                      
-                      return (
-                        <motion.span
-                          key={`title-char-${index}`}
-                          layout={false}
-                          initial={titleAnimationComplete ? false : undefined}
-                          variants={titleVariants}
-                          whileHover={{
-                            scale: 1.4,
-                            y: -8,
-                            rotate: [0, -10, 10, -10, 0],
-                            transition: { duration: 0.3 },
-                          }}
-                          className="inline-block drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]"
-                          style={{
-                            background: `linear-gradient(135deg, ${currentColor}, ${nextColor})`,
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            backgroundClip: 'text',
-                            filter: 'brightness(1.2) saturate(1.3)',
-                          }}
-                        >
-                          {char === " " ? "\u00A0" : char}
-                        </motion.span>
-                      );
-                    })}
-                  </motion.div>
+                    {titleAnimationComplete ? (
+                      // 애니메이션 완료 후 정적 렌더링
+                      titleText.split("").map((char, index) => {
+                        const { currentColor, nextColor } = titleCharColors[index];
+                        return (
+                          <span
+                            key={`title-char-static-${index}`}
+                            className="inline-block drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]"
+                            style={{
+                              background: `linear-gradient(135deg, ${currentColor}, ${nextColor})`,
+                              WebkitBackgroundClip: 'text',
+                              WebkitTextFillColor: 'transparent',
+                              backgroundClip: 'text',
+                              filter: 'brightness(1.2) saturate(1.3)',
+                              transform: 'translateZ(0)',
+                            }}
+                          >
+                            {char === " " ? "\u00A0" : char}
+                          </span>
+                        );
+                      })
+                    ) : (
+                      // 애니메이션 중
+                      <motion.div
+                        className="flex flex-wrap justify-center items-center gap-1 md:gap-2"
+                        initial="hidden"
+                        animate="visible"
+                        onAnimationComplete={() => {
+                          if (!titleAnimationComplete) {
+                            setTimeout(() => setTitleAnimationComplete(true), 100);
+                          }
+                        }}
+                        layout={false}
+                        variants={{
+                          visible: {
+                            transition: {
+                              staggerChildren: 0.08,
+                            },
+                          },
+                        }}
+                      >
+                        {titleText.split("").map((char, index) => {
+                          const { currentColor, nextColor } = titleCharColors[index];
+                          return (
+                            <motion.span
+                              key={`title-char-${index}`}
+                              layout={false}
+                              variants={titleVariants}
+                              whileHover={{
+                                scale: 1.4,
+                                y: -8,
+                                rotate: [0, -10, 10, -10, 0],
+                                transition: { duration: 0.3 },
+                              }}
+                              className="inline-block drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]"
+                              style={{
+                                background: `linear-gradient(135deg, ${currentColor}, ${nextColor})`,
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                backgroundClip: 'text',
+                                filter: 'brightness(1.2) saturate(1.3)',
+                                willChange: 'transform',
+                              }}
+                            >
+                              {char === " " ? "\u00A0" : char}
+                            </motion.span>
+                          );
+                        })}
+                      </motion.div>
+                    )}
+                  </div>
                 </CardTitle>
                 <CardDescription className="relative z-10 mt-2 text-base md:text-lg font-medium">
-                  <motion.div
+                  <div 
                     className="flex flex-wrap justify-center items-center gap-0.5 md:gap-1"
-                    initial={descAnimationComplete ? false : "hidden"}
-                    animate="visible"
-                    onAnimationComplete={() => {
-                      if (!descAnimationComplete) {
-                        setTimeout(() => setDescAnimationComplete(true), 100);
-                      }
-                    }}
-                    layout={false}
-                    variants={{
-                      visible: {
-                        transition: {
-                          staggerChildren: 0.05,
-                          delayChildren: 0.5,
-                        },
-                      },
-                    }}
+                    style={{ isolation: 'isolate', willChange: descAnimationComplete ? 'auto' : 'transform' }}
                   >
-                    {"당신의 운세와 꿈을 분석해서 행운으로 돌려드립니다~!".split("").map((char, index) => (
-                      <motion.span
-                        key={`desc-char-${index}`}
-                        layout={false}
-                        initial={descAnimationComplete ? false : undefined}
-                        variants={descVariants}
-                        whileHover={{
-                          scale: 1.2,
-                          transition: { duration: 0.2 },
+                    {descAnimationComplete ? (
+                      // 애니메이션 완료 후 정적 렌더링
+                      descText.split("").map((char, index) => (
+                        <span
+                          key={`desc-char-static-${index}`}
+                          className="inline-block text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+                          style={{ transform: 'translateZ(0)' }}
+                        >
+                          {char === " " ? "\u00A0" : char}
+                        </span>
+                      ))
+                    ) : (
+                      // 애니메이션 중
+                      <motion.div
+                        className="flex flex-wrap justify-center items-center gap-0.5 md:gap-1"
+                        initial="hidden"
+                        animate="visible"
+                        onAnimationComplete={() => {
+                          if (!descAnimationComplete) {
+                            setTimeout(() => setDescAnimationComplete(true), 100);
+                          }
                         }}
-                        className="inline-block text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+                        layout={false}
+                        variants={{
+                          visible: {
+                            transition: {
+                              staggerChildren: 0.05,
+                              delayChildren: 0.5,
+                            },
+                          },
+                        }}
                       >
-                        {char === " " ? "\u00A0" : char}
-                      </motion.span>
-                    ))}
-                  </motion.div>
+                        {descText.split("").map((char, index) => (
+                          <motion.span
+                            key={`desc-char-${index}`}
+                            layout={false}
+                            variants={descVariants}
+                            whileHover={{
+                              scale: 1.2,
+                              transition: { duration: 0.2 },
+                            }}
+                            className="inline-block text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+                            style={{ willChange: 'transform' }}
+                          >
+                            {char === " " ? "\u00A0" : char}
+                          </motion.span>
+                        ))}
+                      </motion.div>
+                    )}
+                  </div>
                 </CardDescription>
                 <motion.p
                   className="relative z-10 mt-4 text-sm text-white/100"

@@ -20,6 +20,7 @@ export default function Home() {
   const [result, setResult] = useState<DreamAnalysisResult | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [currentDate, setCurrentDate] = useState<string>("");
+  const [titleAnimationComplete, setTitleAnimationComplete] = useState(false);
 
   // 예시 텍스트
   const dreamExampleText = "어둠속 우물에서 빛나는 뱀과 마주했는데 푸른 빛의 옥구슬을 받는 꿈을 꿨어";
@@ -392,30 +393,87 @@ export default function Home() {
                 </motion.div>
                 
                 <CardTitle className="relative z-10 text-2xl md:text-3xl lg:text-4xl font-black leading-tight tracking-tight mb-2">
-                  <div 
-                    className="flex flex-wrap justify-center items-center gap-1 md:gap-2"
-                    style={{ isolation: 'isolate' }}
-                  >
-                    {titleText.split("").map((char, index) => {
-                      const { currentColor, nextColor } = titleCharColors[index];
-                      return (
-                        <span
-                          key={`title-char-${index}`}
-                          className="inline-block drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]"
-                          style={{
-                            background: `linear-gradient(135deg, ${currentColor}, ${nextColor})`,
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            backgroundClip: 'text',
-                            filter: 'brightness(1.2) saturate(1.3)',
-                            transform: 'translateZ(0)',
-                          }}
-                        >
-                          {char === " " ? "\u00A0" : char}
-                        </span>
-                      );
-                    })}
-                  </div>
+                  {titleAnimationComplete ? (
+                    // 애니메이션 완료 후 정적 표시
+                    <div 
+                      className="flex flex-wrap justify-center items-center gap-1 md:gap-2"
+                      style={{ isolation: 'isolate' }}
+                    >
+                      {titleText.split("").map((char, index) => {
+                        const { currentColor, nextColor } = titleCharColors[index];
+                        return (
+                          <span
+                            key={`title-char-static-${index}`}
+                            className="inline-block drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]"
+                            style={{
+                              background: `linear-gradient(135deg, ${currentColor}, ${nextColor})`,
+                              WebkitBackgroundClip: 'text',
+                              WebkitTextFillColor: 'transparent',
+                              backgroundClip: 'text',
+                              filter: 'brightness(1.2) saturate(1.3)',
+                              transform: 'translateZ(0)',
+                            }}
+                          >
+                            {char === " " ? "\u00A0" : char}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    // 처음 로딩 시 순차 애니메이션
+                    <motion.div 
+                      className="flex flex-wrap justify-center items-center gap-1 md:gap-2"
+                      style={{ isolation: 'isolate' }}
+                      initial="hidden"
+                      animate="visible"
+                      onAnimationComplete={() => setTitleAnimationComplete(true)}
+                      variants={{
+                        visible: {
+                          transition: {
+                            staggerChildren: 0.08,
+                          },
+                        },
+                      }}
+                    >
+                      {titleText.split("").map((char, index) => {
+                        const { currentColor, nextColor } = titleCharColors[index];
+                        return (
+                          <motion.span
+                            key={`title-char-${index}`}
+                            variants={{
+                              hidden: { 
+                                opacity: 0, 
+                                scale: 0,
+                                y: -30,
+                                rotate: -180,
+                              },
+                              visible: { 
+                                opacity: 1, 
+                                scale: 1,
+                                y: 0,
+                                rotate: 0,
+                                transition: {
+                                  type: "spring",
+                                  stiffness: 300,
+                                  damping: 20,
+                                },
+                              },
+                            }}
+                            className="inline-block drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]"
+                            style={{
+                              background: `linear-gradient(135deg, ${currentColor}, ${nextColor})`,
+                              WebkitBackgroundClip: 'text',
+                              WebkitTextFillColor: 'transparent',
+                              backgroundClip: 'text',
+                              filter: 'brightness(1.2) saturate(1.3)',
+                            }}
+                          >
+                            {char === " " ? "\u00A0" : char}
+                          </motion.span>
+                        );
+                      })}
+                    </motion.div>
+                  )}
                 </CardTitle>
                 <CardDescription className="relative z-10 mt-2 text-base md:text-lg font-medium">
                   <div 

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Moon, Calendar, Clock, Send, Loader2, AlertCircle, Trophy, BookOpen, X, Flame } from "lucide-react";
+import { Sparkles, Moon, Calendar, Clock, Send, Loader2, AlertCircle, Trophy, BookOpen, X, Flame, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,9 +18,77 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<DreamAnalysisResult | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+  const [currentDate, setCurrentDate] = useState<string>("");
 
   // 예시 텍스트
   const dreamExampleText = "어둠속 우물에서 빛나는 뱀과 마주했는데 푸른 빛의 옥구슬을 받는 꿈을 꿨어";
+
+  // 클라이언트에서만 마운트 확인 및 날짜 설정
+  useEffect(() => {
+    setIsMounted(true);
+    setCurrentDate(
+      new Date().toLocaleDateString('ko-KR', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        weekday: 'long'
+      })
+    );
+  }, []);
+
+  // 우주 별 위치 생성 (클라이언트에서만) - 200개로 증가, 크기 2배
+  const starPositions = useMemo(() => {
+    if (!isMounted) return [];
+    return Array.from({ length: 200 }, () => ({
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      size: (Math.random() * 4 + 2) * 2, // 4-12px (2배 증가)
+      duration: 0.5 + Math.random() * 2, // 더 빠른 반짝임
+      delay: Math.random() * 2,
+      opacity: Math.random() * 0.6 + 0.4, // 0.4-1.0 (더 밝게)
+      x: (Math.random() - 0.5) * 100, // 이동 거리 추가
+      y: (Math.random() - 0.5) * 100,
+    }));
+  }, [isMounted]);
+
+  // 행성 위치 생성 (클라이언트에서만) - 10개로 증가, 크기 2배
+  const planetPositions = useMemo(() => {
+    if (!isMounted) return [];
+    return Array.from({ length: 10 }, () => ({
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      size: (Math.random() * 80 + 40) * 2, // 80-240px (2배 증가)
+      color: [
+        'rgba(139, 69, 19, 0.5)', // 갈색 행성 (더 진하게)
+        'rgba(255, 140, 0, 0.4)', // 주황 행성
+        'rgba(0, 191, 255, 0.4)', // 파란 행성
+        'rgba(147, 112, 219, 0.4)', // 보라 행성
+        'rgba(255, 20, 147, 0.4)', // 분홍 행성
+        'rgba(255, 215, 0, 0.4)', // 금색 행성
+        'rgba(50, 205, 50, 0.4)', // 연두 행성
+        'rgba(255, 69, 0, 0.4)', // 빨강-주황 행성
+        'rgba(138, 43, 226, 0.4)', // 보라-파랑 행성
+        'rgba(255, 192, 203, 0.4)', // 핑크 행성
+      ][Math.floor(Math.random() * 10)],
+      duration: 10 + Math.random() * 20, // 10-30초 (더 빠르게)
+      delay: Math.random() * 3,
+      x: (Math.random() - 0.5) * 400, // 이동 거리 2배 증가
+      y: (Math.random() - 0.5) * 400,
+      rotation: Math.random() * 360, // 회전 추가
+    }));
+  }, [isMounted]);
+
+  // 헤더 별 위치 생성 (클라이언트에서만)
+  const headerStarPositions = useMemo(() => {
+    if (!isMounted) return [];
+    return Array.from({ length: 15 }, () => ({
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      duration: 3 + Math.random() * 2,
+      delay: Math.random() * 2,
+    }));
+  }, [isMounted]);
 
   /**
    * 월에 따른 일수 계산
@@ -171,34 +239,76 @@ export default function Home() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-background via-purple-50/40 via-amber-50/30 to-background p-4 dark:from-background dark:via-purple-950/30 dark:via-amber-950/20 dark:to-background">
-      {/* 배경 장식 요소 - 개선된 그라데이션 */}
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-b from-slate-950 via-indigo-950 to-slate-900 p-4">
+      {/* 우주 배경 요소 */}
       <div className="absolute inset-0 overflow-hidden">
-        {/* 메인 그라데이션 오버레이 */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5" />
+        {/* 우주 배경 그라데이션 */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-indigo-950 via-purple-950 to-slate-900" />
         
-        {/* 애니메이션 배경 요소들 */}
+        {/* 별들 - 반짝이는 효과 + 이동 */}
+        {isMounted && starPositions.map((star, i) => (
+          <motion.div
+            key={`star-${i}`}
+            className="absolute rounded-full"
+            style={{
+              left: `${star.left}%`,
+              top: `${star.top}%`,
+              width: `${star.size}px`,
+              height: `${star.size}px`,
+              backgroundColor: 'white',
+              boxShadow: `0 0 ${star.size * 3}px white, 0 0 ${star.size * 6}px rgba(255,255,255,0.5), 0 0 ${star.size * 10}px rgba(255,255,255,0.3)`,
+            }}
+            animate={{
+              opacity: [star.opacity * 0.3, star.opacity, star.opacity * 0.3],
+              scale: [0.6, 1.4, 0.6],
+              x: [0, star.x, 0],
+              y: [0, star.y, 0],
+            }}
+            transition={{
+              duration: star.duration,
+              repeat: Infinity,
+              delay: star.delay,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+        
+        {/* 행성들 - 다이나믹하게 움직이는 효과 */}
+        {isMounted && planetPositions.map((planet, i) => (
+          <motion.div
+            key={`planet-${i}`}
+            className="absolute rounded-full blur-xl"
+            style={{
+              left: `${planet.left}%`,
+              top: `${planet.top}%`,
+              width: `${planet.size}px`,
+              height: `${planet.size}px`,
+              backgroundColor: planet.color,
+              boxShadow: `0 0 ${planet.size * 1.5}px ${planet.color}, 0 0 ${planet.size * 3}px ${planet.color}`,
+            }}
+            animate={{
+              x: [0, planet.x, planet.x * 0.5, 0],
+              y: [0, planet.y, planet.y * 0.5, 0],
+              opacity: [0.3, 0.6, 0.5, 0.3],
+              scale: [0.9, 1.2, 1.1, 0.9],
+              rotate: [0, planet.rotation, planet.rotation * 2, 0],
+            }}
+            transition={{
+              duration: planet.duration,
+              repeat: Infinity,
+              delay: planet.delay,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+        
+        {/* 은하수 효과 - 더 밝고 넓게 */}
         <motion.div
-          className="absolute -left-32 -top-32 h-[500px] w-[500px] rounded-full bg-gradient-to-br from-primary/20 to-primary/5 blur-3xl"
+          className="absolute top-1/4 left-0 w-full h-2 bg-gradient-to-r from-transparent via-white/20 to-transparent blur-3xl"
           animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.2, 0.4, 0.2],
-            x: [0, 50, 0],
-            y: [0, 30, 0],
-          }}
-          transition={{
-            duration: 12,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-        <motion.div
-          className="absolute -right-32 -bottom-32 h-[600px] w-[600px] rounded-full bg-gradient-to-br from-secondary/20 to-secondary/5 blur-3xl"
-          animate={{
-            scale: [1, 1.4, 1],
-            opacity: [0.2, 0.4, 0.2],
-            x: [0, -40, 0],
-            y: [0, -50, 0],
+            opacity: [0.3, 0.6, 0.3],
+            scaleY: [1, 2, 1],
+            x: [-50, 50, -50],
           }}
           transition={{
             duration: 15,
@@ -206,19 +316,32 @@ export default function Home() {
             ease: "easeInOut",
           }}
         />
-        <motion.div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[400px] w-[400px] rounded-full bg-gradient-to-br from-accent/10 to-transparent blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.1, 0.3, 0.1],
-            rotate: [0, 180, 360],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-        />
+        
+        {/* 별똥별 효과 - 더 많이, 더 밝게 */}
+        {isMounted && Array.from({ length: 5 }).map((_, i) => (
+          <motion.div
+            key={`shooting-${i}`}
+            className="absolute w-2 h-32 bg-gradient-to-b from-white via-yellow-200 to-transparent"
+            style={{
+              left: `${15 + i * 20}%`,
+              top: `${5 + i * 15}%`,
+              transform: 'rotate(45deg)',
+              boxShadow: '0 0 10px white, 0 0 20px rgba(255,255,255,0.5)',
+            }}
+            animate={{
+              x: [0, 800],
+              y: [0, 800],
+              opacity: [0, 1, 0.8, 0],
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              delay: i * 2,
+              repeatDelay: 3,
+              ease: "easeOut",
+            }}
+          />
+        ))}
       </div>
 
       <motion.div
@@ -228,40 +351,50 @@ export default function Home() {
         animate="visible"
       >
         <motion.div variants={itemVariants}>
-          <Card className="relative border-2 border-primary/30 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.1)] backdrop-blur-2xl bg-gradient-to-br from-card/95 via-card/90 to-card/95 dark:from-card/95 dark:via-card/90 dark:to-card/95 overflow-hidden">
-            {/* 카드 외곽 글로우 효과 */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 rounded-lg blur-2xl opacity-50 animate-pulse" />
+          <Card className="relative border-0 shadow-2xl backdrop-blur-xl bg-white/95 dark:bg-gray-800/95 overflow-hidden rounded-3xl">
+            {/* 카드 외곽 글로우 효과 - 보라색 */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-purple-400/20 via-purple-500/20 to-purple-400/20 rounded-3xl blur-xl opacity-60" />
             
-            {/* 카드 내부 다층 그라데이션 효과 */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-t from-background/20 via-transparent to-transparent pointer-events-none" />
+            {/* 카드 내부 부드러운 그라데이션 */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white via-purple-50/30 to-white dark:from-gray-800 dark:via-purple-900/20 dark:to-gray-800 pointer-events-none" />
             
-            {/* 상단 빛나는 라인 */}
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary via-secondary via-primary to-transparent opacity-80" />
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-            
-            {/* 좌우 측면 그라데이션 */}
-            <div className="absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-primary/30 to-transparent" />
-            <div className="absolute right-0 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-secondary/30 to-transparent" />
-            
-            {/* 배경 패턴 효과 */}
-            <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.03] pointer-events-none" style={{
+            {/* 별 장식 패턴 */}
+            <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none" style={{
               backgroundImage: `radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)`,
               backgroundSize: '40px 40px'
             }} />
             
-            <CardHeader className="relative overflow-hidden text-center pb-8 pt-8">
-              {/* 헤더 배경 다층 그라데이션 */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-secondary/8 via-primary/12 to-secondary/10" />
-              <div className="absolute inset-0 bg-gradient-to-t from-card/50 to-transparent" />
+            <CardHeader className="relative overflow-hidden text-center pb-8 pt-8 bg-gradient-to-br from-purple-600 to-purple-500 rounded-t-3xl">
+              {/* 헤더 배경 - 보라색 그라데이션 */}
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-purple-500 to-purple-600" />
+              
+              {/* 별 장식 */}
+              <div className="absolute inset-0 opacity-20">
+                {isMounted && headerStarPositions.map((star, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute"
+                    style={{
+                      left: `${star.left}%`,
+                      top: `${star.top}%`,
+                    }}
+                    animate={{
+                      opacity: [0.2, 0.6, 0.2],
+                      scale: [0.5, 1, 0.5],
+                    }}
+                    transition={{
+                      duration: star.duration,
+                      repeat: Infinity,
+                      delay: star.delay,
+                    }}
+                  >
+                    <Star className="h-3 w-3 text-white fill-white/40" />
+                  </motion.div>
+                ))}
+              </div>
               
               {/* 헤더 하단 구분선 */}
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary/40 via-secondary/40 via-primary/40 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
-              
-              {/* 헤더 측면 장식 */}
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-16 bg-gradient-to-b from-transparent via-primary/40 to-transparent rounded-r-full" />
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-16 bg-gradient-to-b from-transparent via-secondary/40 to-transparent rounded-l-full" />
+              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
               
               <motion.div
                 className="relative z-10"
@@ -269,11 +402,23 @@ export default function Home() {
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
               >
+                {/* 날짜 표시 */}
+                {isMounted && currentDate && (
+                  <motion.p
+                    className="text-white/90 text-sm mb-2"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    {currentDate}
+                  </motion.p>
+                )}
+                
                 <motion.div
-                  className="mb-8 flex justify-center"
+                  className="mb-6 flex justify-center"
                   animate={{
                     rotate: [0, 15, -15, 0],
-                    scale: [1, 1.15, 1],
+                    scale: [1, 1.1, 1],
                   }}
                   transition={{
                     duration: 4,
@@ -282,41 +427,140 @@ export default function Home() {
                   }}
                 >
                   <div className="relative">
-                    {/* 다층 글로우 효과 */}
-                    <div className="absolute inset-0 bg-primary/30 blur-2xl rounded-full animate-pulse" />
-                    <div className="absolute inset-0 bg-secondary/20 blur-xl rounded-full" />
-                    <div className="absolute inset-0 bg-accent/10 blur-lg rounded-full" />
-                    {/* 아이콘 주변 빛나는 링 */}
-                    <motion.div
-                      className="absolute inset-0 border-2 border-primary/30 rounded-full"
-                      animate={{
-                        scale: [1, 1.3, 1],
-                        opacity: [0.5, 0, 0.5],
-                      }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        ease: "easeOut",
-                      }}
-                    />
-                    <Sparkles className="relative h-16 w-16 text-primary drop-shadow-2xl filter brightness-110" />
+                    {/* 다층 글로우 효과 - 보라색 */}
+                    <div className="absolute inset-0 bg-purple-400/40 blur-2xl rounded-full animate-pulse" />
+                    <div className="absolute inset-0 bg-purple-300/30 blur-xl rounded-full" />
+                    <Sparkles className="relative h-14 w-14 text-white drop-shadow-2xl" />
                   </div>
                 </motion.div>
                 
-                <CardTitle className="relative z-10 text-4xl font-black bg-gradient-to-r from-primary via-secondary via-accent via-primary to-secondary bg-clip-text text-transparent md:text-4xl lg:text-5xl leading-tight tracking-tight">
-                  <span className="drop-shadow-[0_2px_8px_rgba(139,92,246,0.3)]">AI 꿈해석</span>
-                  <br />
-                  <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent drop-shadow-[0_2px_6px_rgba(245,158,11,0.3)]">
-                    AI 꿈해석 로또 번호 추천기
-                  </span>
+                <CardTitle className="relative z-10 text-2xl md:text-3xl lg:text-4xl font-black leading-tight tracking-tight mb-2">
+                  <motion.div
+                    className="flex flex-wrap justify-center items-center gap-1 md:gap-2"
+                    initial="hidden"
+                    animate="visible"
+                    variants={{
+                      visible: {
+                        transition: {
+                          staggerChildren: 0.08,
+                        },
+                      },
+                    }}
+                  >
+                    {"AI 꿈해석 로또 번호 추천기".split("").map((char, index) => {
+                      // 무지개 색상 배열 (더 부드러운 전환을 위해 더 많은 색상)
+                      const rainbowColors = [
+                        '#FF0000', // 빨강
+                        '#FF4500', // 주황빨강
+                        '#FF7F00', // 주황
+                        '#FFA500', // 오렌지
+                        '#FFD700', // 금색
+                        '#FFFF00', // 노랑
+                        '#ADFF2F', // 연두
+                        '#00FF00', // 초록
+                        '#00CED1', // 청록
+                        '#00BFFF', // 하늘색
+                        '#0000FF', // 파랑
+                        '#4169E1', // 로얄블루
+                        '#4B0082', // 남색
+                        '#8A2BE2', // 블루바이올렛
+                        '#9400D3', // 보라
+                        '#FF1493', // 딥핑크
+                        '#FF69B4', // 핑크
+                      ];
+                      const totalChars = "AI 꿈해석 로또 번호 추천기".length;
+                      const hue = (index / totalChars) * 360;
+                      const currentColor = `hsl(${hue}, 100%, 60%)`;
+                      const nextColor = `hsl(${(hue + 30) % 360}, 100%, 60%)`;
+                      
+                      return (
+                        <motion.span
+                          key={index}
+                          variants={{
+                            hidden: { 
+                              opacity: 0, 
+                              scale: 0,
+                              y: -30,
+                              rotate: -180,
+                            },
+                            visible: { 
+                              opacity: 1, 
+                              scale: 1,
+                              y: 0,
+                              rotate: 0,
+                              transition: {
+                                type: "spring",
+                                stiffness: 300,
+                                damping: 20,
+                              },
+                            },
+                          }}
+                          whileHover={{
+                            scale: 1.4,
+                            y: -8,
+                            rotate: [0, -10, 10, -10, 0],
+                            transition: { duration: 0.3 },
+                          }}
+                          className="inline-block drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]"
+                          style={{
+                            background: `linear-gradient(135deg, ${currentColor}, ${nextColor})`,
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text',
+                            filter: 'brightness(1.2) saturate(1.3)',
+                          }}
+                        >
+                          {char === " " ? "\u00A0" : char}
+                        </motion.span>
+                      );
+                    })}
+                  </motion.div>
                 </CardTitle>
-                <CardDescription className="relative z-10 mt-4 text-base md:text-lg text-foreground/70 font-semibold">
-                  <span className="bg-gradient-to-r from-foreground/80 to-foreground/60 bg-clip-text text-transparent">
-                    당신의 꿈을 행운으로 돌려 드립니다~
-                  </span>
+                <CardDescription className="relative z-10 mt-2 text-base md:text-lg font-medium">
+                  <motion.div
+                    className="flex flex-wrap justify-center items-center gap-0.5 md:gap-1"
+                    initial="hidden"
+                    animate="visible"
+                    variants={{
+                      visible: {
+                        transition: {
+                          staggerChildren: 0.05,
+                          delayChildren: 0.5,
+                        },
+                      },
+                    }}
+                  >
+                    {"당신의 운세와 꿈을 분석해서 행운으로 돌려드립니다~!".split("").map((char, index) => (
+                      <motion.span
+                        key={index}
+                        variants={{
+                          hidden: { 
+                            opacity: 0, 
+                            scale: 0,
+                          },
+                          visible: { 
+                            opacity: 1, 
+                            scale: 1,
+                            transition: {
+                              type: "spring",
+                              stiffness: 200,
+                              damping: 15,
+                            },
+                          },
+                        }}
+                        whileHover={{
+                          scale: 1.2,
+                          transition: { duration: 0.2 },
+                        }}
+                        className="inline-block text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+                      >
+                        {char === " " ? "\u00A0" : char}
+                      </motion.span>
+                    ))}
+                  </motion.div>
                 </CardDescription>
                 <motion.p
-                  className="relative z-10 mt-2 text-s text-muted-foreground/60"
+                  className="relative z-10 mt-4 text-sm text-white/100"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.3 }}
@@ -334,35 +578,33 @@ export default function Home() {
               >
                 <label
                   htmlFor="dream"
-                  className="flex items-center gap-3 text-sm font-bold text-foreground"
+                  className="flex items-center gap-3 text-sm font-bold text-gray-700 dark:text-gray-200"
                 >
-                  <div className="relative p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20 shadow-lg">
-                    <div className="absolute inset-0 bg-primary/10 rounded-xl blur-sm" />
-                    <Moon className="relative h-5 w-5 text-primary drop-shadow-md" />
+                  <div className="relative p-2 rounded-xl bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900/30 dark:to-purple-800/20 border border-purple-200 dark:border-purple-700 shadow-md">
+                    <Moon className="relative h-5 w-5 text-purple-600 dark:text-purple-400" />
                   </div>
-                  <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                  <span className="text-gray-700 dark:text-gray-200">
                     오늘 아침 꾼 꿈을 입력해주세요
                   </span>
-                  <span className="text-destructive ml-1 text-lg">*</span>
+                  <span className="text-red-500 ml-1 text-lg">*</span>
                 </label>
                 <motion.div
                   whileFocus={{ scale: 1.01 }}
                   transition={{ duration: 0.2 }}
                   className="relative group"
                 >
-                  {/* 포커스 시 글로우 효과 */}
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg blur-sm opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
+                  {/* 포커스 시 글로우 효과 - 보라색 */}
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-300/30 to-purple-400/30 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
                   
-                  {/* 입력 필드 배경 패턴 */}
-                  <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-background/80 via-background/60 to-background/80 backdrop-blur-md border-2 border-primary/20 group-focus-within:border-primary/50 transition-all duration-300" />
+                  {/* 입력 필드 배경 */}
+                  <div className="absolute inset-0 rounded-xl bg-white dark:bg-gray-800 border-2 border-purple-200 dark:border-purple-700 group-focus-within:border-purple-400 dark:group-focus-within:border-purple-500 transition-all duration-300 shadow-sm" />
                   
                   <Textarea
                     id="dream"
                     placeholder={`예: ${dreamExampleText}`}
                     value={dreamText}
                     onChange={(e) => setDreamText(e.target.value)}
-                    className="relative min-h-28 text-base transition-all duration-300 focus:ring-2 focus:ring-primary/40 focus:ring-offset-2 bg-transparent border-0 shadow-inner"
+                    className="relative min-h-28 text-base transition-all duration-300 focus:ring-2 focus:ring-purple-400/40 focus:ring-offset-2 bg-transparent border-0 text-gray-700 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-500"
                     required
                   />
                 </motion.div>
@@ -370,13 +612,13 @@ export default function Home() {
                   <motion.button
                     type="button"
                     onClick={() => setDreamText(dreamExampleText)}
-                    className="group text-xs text-muted-foreground hover:text-primary transition-all duration-200 cursor-pointer flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary/5 border border-transparent hover:border-primary/20"
+                    className="group text-xs text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-200 cursor-pointer flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 border border-transparent hover:border-purple-200 dark:hover:border-purple-700"
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                   >
                     <span className="text-base">💡</span>
-                    <span className="italic text-primary/80 group-hover:text-primary">"{dreamExampleText}"</span>
+                    <span className="italic text-purple-600/80 dark:text-purple-400/80 group-hover:text-purple-600 dark:group-hover:text-purple-400">"{dreamExampleText}"</span>
                     <span className="group-hover:underline">를 클릭하여 사용하기</span>
                   </motion.button>
                 )}
@@ -384,20 +626,20 @@ export default function Home() {
                   className="flex items-center justify-between text-xs"
                   animate={{
                     color: isDreamTextValid
-                      ? "hsl(var(--muted-foreground))"
-                      : "hsl(var(--destructive))",
+                      ? "#6b7280"
+                      : "#ef4444",
                   }}
                 >
-                  <span>
+                  <span className={isDreamTextValid ? "text-gray-500 dark:text-gray-400" : "text-red-500"}>
                     최소 20자 이상, 최대 2000자 이하
                   </span>
-                  <span className="font-medium">
+                  <span className={`font-medium ${isDreamTextValid ? "text-gray-500 dark:text-gray-400" : "text-red-500"}`}>
                     {dreamText.length}/2000
                   </span>
                 </motion.div>
                 {dreamText.length > 0 && !isDreamTextValid && (
                   <motion.p
-                    className="text-xs font-medium text-destructive"
+                    className="text-xs font-medium text-red-500"
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
                   >
@@ -425,19 +667,18 @@ export default function Home() {
                     
                     <label
                       htmlFor="birthYear"
-                      className="relative flex items-center gap-3 text-sm font-bold text-foreground"
+                      className="relative flex items-center gap-3 text-sm font-bold text-gray-700 dark:text-gray-200"
                     >
-                      <div className="relative p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20 shadow-md">
-                        <div className="absolute inset-0 bg-primary/10 rounded-xl blur-sm" />
-                        <Calendar className="relative h-5 w-5 text-primary drop-shadow-md" />
+                      <div className="relative p-2 rounded-xl bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900/30 dark:to-purple-800/20 border border-purple-200 dark:border-purple-700 shadow-md">
+                        <Calendar className="relative h-5 w-5 text-purple-600 dark:text-purple-400" />
                       </div>
-                      <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                      <span className="text-gray-700 dark:text-gray-200">
                         출생년도
                       </span>
-                      <span className="text-destructive ml-1 text-lg">*</span>
+                      <span className="text-red-500 ml-1 text-lg">*</span>
                     </label>
                     <div className="relative">
-                      <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-primary/10 rounded-lg blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-300/20 to-purple-400/20 rounded-lg blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
                       <Input
                         id="birthYear"
                         type="text"
@@ -448,7 +689,7 @@ export default function Home() {
                           const value = e.target.value.replace(/\D/g, '').slice(0, 4);
                           setBirthYear(value);
                         }}
-                        className="relative transition-all duration-300 focus:border-primary/60 focus:ring-2 focus:ring-primary/40 focus:ring-offset-2 text-lg font-bold bg-background/60 backdrop-blur-md border-2 border-primary/20 shadow-inner"
+                        className="relative transition-all duration-300 focus:border-purple-400 dark:focus:border-purple-500 focus:ring-2 focus:ring-purple-400/40 focus:ring-offset-2 text-lg font-bold bg-white dark:bg-gray-800 border-2 border-purple-200 dark:border-purple-700 shadow-sm text-gray-700 dark:text-gray-200"
                         required
                       />
                     </div>
@@ -456,17 +697,17 @@ export default function Home() {
                       className="text-xs flex items-center gap-1"
                       animate={{
                         color: isBirthYearValid
-                          ? "hsl(var(--muted-foreground))"
+                          ? "#6b7280"
                           : birthYear.length > 0
-                          ? "hsl(var(--destructive))"
-                          : "hsl(var(--muted-foreground))",
+                          ? "#ef4444"
+                          : "#6b7280",
                       }}
                     >
                       {birthYear.length === 0 
                         ? "4자리 출생년도를 입력하세요"
                         : !isBirthYearValid
                         ? "올바른 출생년도를 입력해주세요"
-                        : <><span className="text-primary">✓</span> 올바른 형식입니다</>}
+                        : <><span className="text-purple-600 dark:text-purple-400">✓</span> 올바른 형식입니다</>}
                     </motion.p>
                   </motion.div>
 
@@ -479,18 +720,17 @@ export default function Home() {
                     {/* 배경 그라데이션 */}
                     <div className="absolute -inset-1 bg-gradient-to-br from-accent/10 to-accent/5 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     
-                    <label className="relative flex items-center gap-3 text-sm font-bold text-foreground">
-                      <div className="relative p-2 rounded-xl bg-gradient-to-br from-accent/20 to-accent/10 border border-accent/20 shadow-md">
-                        <div className="absolute inset-0 bg-accent/10 rounded-xl blur-sm" />
-                        <Calendar className="relative h-5 w-5 text-accent drop-shadow-md" />
+                    <label className="relative flex items-center gap-3 text-sm font-bold text-gray-700 dark:text-gray-200">
+                      <div className="relative p-2 rounded-xl bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900/30 dark:to-purple-800/20 border border-purple-200 dark:border-purple-700 shadow-md">
+                        <Calendar className="relative h-5 w-5 text-purple-600 dark:text-purple-400" />
                       </div>
-                      <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                      <span className="text-gray-700 dark:text-gray-200">
                         출생월일 (선택)
                       </span>
                     </label>
                     <div className="relative grid grid-cols-2 gap-2">
                       <div className="relative">
-                        <div className="absolute -inset-0.5 bg-gradient-to-r from-accent/20 to-accent/10 rounded-lg blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
+                        <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-300/20 to-purple-400/20 rounded-lg blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
                         <select
                           id="birthMonth"
                           value={birthMonth}
@@ -498,7 +738,7 @@ export default function Home() {
                             setBirthMonth(e.target.value);
                             setBirthDay(""); // 월이 변경되면 일 초기화
                           }}
-                          className="relative flex h-12 w-full rounded-lg border-2 border-accent/20 bg-background/60 backdrop-blur-md px-3 py-2 text-base font-semibold shadow-inner transition-all duration-300 outline-none focus-visible:border-accent/60 focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                          className="relative flex h-12 w-full rounded-lg border-2 border-purple-200 dark:border-purple-700 bg-white dark:bg-gray-800 px-3 py-2 text-base font-semibold shadow-sm transition-all duration-300 outline-none focus-visible:border-purple-400 dark:focus-visible:border-purple-500 focus-visible:ring-2 focus-visible:ring-purple-400/40 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-gray-700 dark:text-gray-200 md:text-sm"
                         >
                           <option value="">월</option>
                           {Array.from({ length: 12 }, (_, i) => (
@@ -509,13 +749,13 @@ export default function Home() {
                         </select>
                       </div>
                       <div className="relative">
-                        <div className="absolute -inset-0.5 bg-gradient-to-r from-accent/20 to-accent/10 rounded-lg blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
+                        <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-300/20 to-purple-400/20 rounded-lg blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
                         <select
                           id="birthDay"
                           value={birthDay}
                           onChange={(e) => setBirthDay(e.target.value)}
                           disabled={!birthMonth}
-                          className="relative flex h-12 w-full rounded-lg border-2 border-accent/20 bg-background/60 backdrop-blur-md px-3 py-2 text-base font-semibold shadow-inner transition-all duration-300 outline-none focus-visible:border-accent/60 focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                          className="relative flex h-12 w-full rounded-lg border-2 border-purple-200 dark:border-purple-700 bg-white dark:bg-gray-800 px-3 py-2 text-base font-semibold shadow-sm transition-all duration-300 outline-none focus-visible:border-purple-400 dark:focus-visible:border-purple-500 focus-visible:ring-2 focus-visible:ring-purple-400/40 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-gray-700 dark:text-gray-200 md:text-sm"
                         >
                           <option value="">일</option>
                           {Array.from({ length: getDaysInMonth(birthMonth) }, (_, i) => (
@@ -528,11 +768,11 @@ export default function Home() {
                     </div>
                     {birthMonth && birthDay && (
                       <motion.p
-                        className="text-xs text-muted-foreground flex items-center gap-1"
+                        className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-1"
                         initial={{ opacity: 0, y: -3 }}
                         animate={{ opacity: 1, y: 0 }}
                       >
-                        <span className="text-accent">✓</span>
+                        <span className="text-purple-600 dark:text-purple-400">✓</span>
                         출생월일 입력 시 더 정확한 해석이 가능합니다
                       </motion.p>
                     )}
@@ -549,23 +789,22 @@ export default function Home() {
                     
                     <label
                       htmlFor="birthHour"
-                      className="relative flex items-center gap-3 text-sm font-bold text-foreground"
+                      className="relative flex items-center gap-3 text-sm font-bold text-gray-700 dark:text-gray-200"
                     >
-                      <div className="relative p-2 rounded-xl bg-gradient-to-br from-secondary/20 to-secondary/10 border border-secondary/20 shadow-md">
-                        <div className="absolute inset-0 bg-secondary/10 rounded-xl blur-sm" />
-                        <Clock className="relative h-5 w-5 text-secondary drop-shadow-md" />
+                      <div className="relative p-2 rounded-xl bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900/30 dark:to-purple-800/20 border border-purple-200 dark:border-purple-700 shadow-md">
+                        <Clock className="relative h-5 w-5 text-purple-600 dark:text-purple-400" />
                       </div>
-                      <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                      <span className="text-gray-700 dark:text-gray-200">
                         출생 시각 (선택)
                       </span>
                     </label>
                     <div className="relative">
-                      <div className="absolute -inset-0.5 bg-gradient-to-r from-secondary/20 to-secondary/10 rounded-lg blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-300/20 to-purple-400/20 rounded-lg blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
                       <select
                         id="birthHour"
                         value={birthHour}
                         onChange={(e) => setBirthHour(e.target.value)}
-                        className="relative flex h-12 w-full rounded-lg border-2 border-secondary/20 bg-background/60 backdrop-blur-md px-4 py-2 text-base font-semibold shadow-inner transition-all duration-300 outline-none focus-visible:border-secondary/60 focus-visible:ring-2 focus-visible:ring-secondary/40 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                        className="relative flex h-12 w-full rounded-lg border-2 border-purple-200 dark:border-purple-700 bg-white dark:bg-gray-800 px-4 py-2 text-base font-semibold shadow-sm transition-all duration-300 outline-none focus-visible:border-purple-400 dark:focus-visible:border-purple-500 focus-visible:ring-2 focus-visible:ring-purple-400/40 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-gray-700 dark:text-gray-200 md:text-sm"
                       >
                       <option value="">모르겠음</option>
                       {Array.from({ length: 24 }, (_, i) => (
@@ -574,16 +813,7 @@ export default function Home() {
                         </option>
                       ))}
                     </select>
-                    {birthHour && (
-                      <motion.p
-                        className="text-xs text-muted-foreground flex items-center gap-1"
-                        initial={{ opacity: 0, y: -3 }}
-                        animate={{ opacity: 1, y: 0 }}
-                      >
-                        <span className="text-secondary">✓</span>
-                        출생 시각 입력 시 더 정확한 해석이 가능합니다
-                      </motion.p>
-                    )}
+
                     </div>
                   </motion.div>
                 </div>
@@ -592,15 +822,15 @@ export default function Home() {
               {/* 액션 버튼 */}
               <motion.div variants={itemVariants} className="pt-4">
                 <motion.div
-                  whileHover={!isLoading ? { scale: 1.03, y: -3 } : {}}
-                  whileTap={!isLoading ? { scale: 0.97 } : {}}
+                  whileHover={!isLoading ? { scale: 1.02, y: -2 } : {}}
+                  whileTap={!isLoading ? { scale: 0.98 } : {}}
                   className="relative group"
                 >
-                  {/* 다층 글로우 효과 */}
+                  {/* 다층 글로우 효과 - 보라색 */}
                   <motion.div
-                    className="absolute -inset-1 bg-gradient-to-r from-primary via-secondary via-accent to-primary rounded-xl blur-xl opacity-60"
+                    className="absolute -inset-1 bg-gradient-to-r from-purple-500 via-purple-600 to-purple-500 rounded-xl blur-xl opacity-50"
                     animate={{
-                      opacity: [0.4, 0.7, 0.4],
+                      opacity: [0.4, 0.6, 0.4],
                     }}
                     transition={{
                       duration: 3,
@@ -608,10 +838,6 @@ export default function Home() {
                       ease: "easeInOut",
                     }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-primary rounded-lg blur-lg opacity-50 group-hover:opacity-80 transition-opacity duration-500" />
-                  
-                  {/* 버튼 내부 그라데이션 오버레이 */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/10 rounded-lg" />
                   
                   <Button
                     onClick={(e) => {
@@ -620,13 +846,13 @@ export default function Home() {
                       handleSubmit();
                     }}
                     disabled={!isFormValid || isLoading}
-                    className="group relative w-full overflow-hidden bg-gradient-to-r from-primary via-accent to-secondary text-base md:text-lg font-black shadow-2xl transition-all duration-500 hover:shadow-[0_0_40px_rgba(139,92,246,0.5)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-xl border-0 h-14"
+                    className="group relative w-full overflow-hidden bg-gradient-to-r from-purple-600 via-purple-500 to-purple-600 text-white text-base md:text-lg font-bold shadow-xl transition-all duration-500 hover:shadow-[0_0_30px_rgba(147,51,234,0.6)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-xl border-0 h-14 rounded-xl"
                     size="lg"
                     type="button"
                   >
                     {/* 호버 시 그라데이션 변화 */}
                     <motion.span
-                      className="absolute inset-0 bg-gradient-to-r from-secondary via-primary via-accent to-secondary opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+                      className="absolute inset-0 bg-gradient-to-r from-purple-500 via-purple-600 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
                       initial={false}
                     />
                     
@@ -668,19 +894,19 @@ export default function Home() {
                     initial={{ opacity: 0, y: -10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                    className="rounded-xl border border-destructive/50 bg-gradient-to-br from-destructive/10 to-destructive/5 backdrop-blur-sm p-4 shadow-lg"
+                    className="rounded-xl border border-red-300 dark:border-red-700 bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-900/20 dark:to-red-800/10 backdrop-blur-sm p-4 shadow-lg"
                   >
                     <div className="flex items-start gap-3">
-                      <div className="p-1.5 rounded-lg bg-destructive/20">
-                        <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
+                      <div className="p-1.5 rounded-lg bg-red-200 dark:bg-red-900/30">
+                        <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-destructive mb-1">오류 발생</p>
-                        <p className="text-sm text-destructive/90 leading-relaxed">{error}</p>
+                        <p className="text-sm font-semibold text-red-600 dark:text-red-400 mb-1">오류 발생</p>
+                        <p className="text-sm text-red-700 dark:text-red-300 leading-relaxed">{error}</p>
                       </div>
                       <button
                         onClick={() => setError(null)}
-                        className="text-destructive/70 hover:text-destructive hover:bg-destructive/10 rounded-lg p-1 transition-all duration-200 flex-shrink-0"
+                        className="text-red-600/70 dark:text-red-400/70 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg p-1 transition-all duration-200 flex-shrink-0"
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -702,32 +928,50 @@ export default function Home() {
               variants={itemVariants}
               className="mt-6"
             >
-              <Card className="relative border-2 border-primary/30 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.1)] backdrop-blur-2xl bg-gradient-to-br from-card/95 via-card/90 to-card/95 dark:from-card/95 dark:via-card/90 dark:to-card/95 overflow-hidden">
-                {/* 결과 카드 외곽 글로우 */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 rounded-lg blur-2xl opacity-50 animate-pulse" />
+              <Card className="relative border-0 shadow-2xl backdrop-blur-xl bg-white/95 dark:bg-gray-800/95 overflow-hidden rounded-3xl">
+                {/* 결과 카드 외곽 글로우 - 보라색 */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-purple-400/20 via-purple-500/20 to-purple-400/20 rounded-3xl blur-xl opacity-60" />
                 
-                {/* 결과 카드 내부 다층 그라데이션 */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 pointer-events-none" />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/20 via-transparent to-transparent pointer-events-none" />
+                {/* 결과 카드 내부 부드러운 그라데이션 */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white via-purple-50/30 to-white dark:from-gray-800 dark:via-purple-900/20 dark:to-gray-800 pointer-events-none" />
                 
-                {/* 상단 빛나는 라인 */}
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary via-secondary via-primary to-transparent opacity-80" />
-                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-                
-                {/* 배경 패턴 */}
-                <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.03] pointer-events-none" style={{
+                {/* 별 장식 패턴 */}
+                <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none" style={{
                   backgroundImage: `radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)`,
                   backgroundSize: '40px 40px'
                 }} />
                 
-                <CardHeader className="relative overflow-hidden text-center pb-8 pt-8">
-                  {/* 헤더 배경 다층 그라데이션 */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-secondary/8 via-primary/12 to-secondary/10" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-card/50 to-transparent" />
+                <CardHeader className="relative overflow-hidden text-center pb-8 pt-8 bg-gradient-to-br from-purple-600 to-purple-500 rounded-t-3xl">
+                  {/* 헤더 배경 - 보라색 그라데이션 */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-purple-500 to-purple-600" />
+                  
+                  {/* 별 장식 */}
+                  <div className="absolute inset-0 opacity-20">
+                    {isMounted && headerStarPositions.map((star, i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute"
+                        style={{
+                          left: `${star.left}%`,
+                          top: `${star.top}%`,
+                        }}
+                        animate={{
+                          opacity: [0.2, 0.6, 0.2],
+                          scale: [0.5, 1, 0.5],
+                        }}
+                        transition={{
+                          duration: star.duration,
+                          repeat: Infinity,
+                          delay: star.delay,
+                        }}
+                      >
+                        <Star className="h-3 w-3 text-white fill-white/40" />
+                      </motion.div>
+                    ))}
+                  </div>
                   
                   {/* 헤더 하단 구분선 */}
-                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary/40 via-secondary/40 via-primary/40 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
                   
                   <motion.div
                     className="relative z-10"
@@ -739,7 +983,7 @@ export default function Home() {
                       className="mb-8 flex justify-center"
                       animate={{
                         rotate: [0, 360],
-                        scale: [1, 1.15, 1],
+                        scale: [1, 1.1, 1],
                       }}
                       transition={{
                         duration: 20,
@@ -748,28 +992,14 @@ export default function Home() {
                       }}
                     >
                       <div className="relative">
-                        {/* 다층 글로우 효과 */}
-                        <div className="absolute inset-0 bg-primary/30 blur-2xl rounded-full animate-pulse" />
-                        <div className="absolute inset-0 bg-secondary/20 blur-xl rounded-full" />
-                        <div className="absolute inset-0 bg-accent/10 blur-lg rounded-full" />
-                        {/* 빛나는 링 */}
-                        <motion.div
-                          className="absolute inset-0 border-2 border-primary/30 rounded-full"
-                          animate={{
-                            scale: [1, 1.3, 1],
-                            opacity: [0.5, 0, 0.5],
-                          }}
-                          transition={{
-                            duration: 3,
-                            repeat: Infinity,
-                            ease: "easeOut",
-                          }}
-                        />
-                        <Trophy className="relative h-16 w-16 text-primary drop-shadow-2xl filter brightness-110" />
+                        {/* 다층 글로우 효과 - 보라색 */}
+                        <div className="absolute inset-0 bg-purple-400/40 blur-2xl rounded-full animate-pulse" />
+                        <div className="absolute inset-0 bg-purple-300/30 blur-xl rounded-full" />
+                        <Trophy className="relative h-16 w-16 text-white drop-shadow-2xl" />
                       </div>
                     </motion.div>
-                    <CardTitle className="relative z-10 text-3xl font-black bg-gradient-to-r from-primary via-secondary via-accent via-primary to-secondary bg-clip-text text-transparent md:text-4xl lg:text-5xl">
-                      <span className="drop-shadow-[0_2px_8px_rgba(139,92,246,0.3)]">꿈해석 결과</span>
+                    <CardTitle className="relative z-10 text-3xl font-black text-white md:text-4xl lg:text-5xl">
+                      <span className="drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]">꿈과 관련된 판타지 스토리</span>
                     </CardTitle>
                   </motion.div>
                 </CardHeader>
@@ -777,9 +1007,9 @@ export default function Home() {
                 <CardContent className="relative space-y-6 pt-8 px-6 pb-6">
                   {/* 스토리 */}
                   <div className="space-y-4">
-                    <h3 className="flex items-center gap-3 text-lg font-bold">
-                      <div className="p-2 rounded-lg bg-secondary/10">
-                        <Sparkles className="h-5 w-5 text-secondary" />
+                    <h3 className="flex items-center gap-3 text-lg font-bold text-gray-700 dark:text-gray-200">
+                      <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                        <Sparkles className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                       </div>
                       <span>판타지 스토리</span>
                     </h3>
@@ -787,21 +1017,20 @@ export default function Home() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.3, type: "spring" }}
-                      className="relative rounded-xl border border-border/50 bg-gradient-to-br from-primary/10 via-secondary/5 to-primary/10 backdrop-blur-sm p-5 shadow-sm"
+                      className="relative rounded-xl border border-purple-200 dark:border-purple-700 bg-gradient-to-br from-purple-50/50 via-white to-purple-50/50 dark:from-purple-900/20 dark:via-gray-800 dark:to-purple-900/20 backdrop-blur-sm p-5 shadow-sm"
                     >
-                      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-                      <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap text-foreground/90">{result.story}</p>
+                      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-300/50 to-transparent" />
+                      <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap text-gray-700 dark:text-gray-200">{result.story}</p>
                     </motion.div>
                   </div>
 
                   {/* 그리스 신화 스토리 */}
                   <div className="space-y-4">
-                    <h3 className="flex items-center gap-3 text-lg font-bold">
-                      <div className="relative p-2.5 rounded-xl bg-gradient-to-br from-accent/20 to-accent/10 border border-accent/20 shadow-lg">
-                        <div className="absolute inset-0 bg-accent/10 rounded-xl blur-sm" />
-                        <Flame className="relative h-6 w-6 text-accent drop-shadow-md" />
+                    <h3 className="flex items-center gap-3 text-lg font-bold text-gray-700 dark:text-gray-200">
+                      <div className="relative p-2.5 rounded-xl bg-gradient-to-br from-purple-200 to-purple-100 dark:from-purple-800/30 dark:to-purple-700/20 border border-purple-300 dark:border-purple-600 shadow-lg">
+                        <Flame className="relative h-6 w-6 text-purple-600 dark:text-purple-400" />
                       </div>
-                      <span className="bg-gradient-to-r from-accent via-primary to-accent bg-clip-text text-transparent">
+                      <span className="text-gray-700 dark:text-gray-200">
                         그리스 신화 스토리
                       </span>
                     </h3>
@@ -809,11 +1038,11 @@ export default function Home() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.4, type: "spring" }}
-                      className="relative rounded-xl border-2 border-accent/30 bg-gradient-to-br from-accent/10 via-primary/5 to-accent/10 backdrop-blur-sm p-5 shadow-lg"
+                      className="relative rounded-xl border-2 border-purple-300 dark:border-purple-600 bg-gradient-to-br from-purple-100/50 via-white to-purple-100/50 dark:from-purple-900/30 dark:via-gray-800 dark:to-purple-900/30 backdrop-blur-sm p-5 shadow-lg"
                     >
-                      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent/40 via-primary/40 via-accent/40 to-transparent" />
-                      <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent rounded-xl" />
-                      <p className="relative text-sm md:text-base leading-relaxed whitespace-pre-wrap text-foreground/90 font-medium">
+                      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-purple-400/50 via-purple-500/50 via-purple-400/50 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 to-transparent dark:from-purple-900/10 rounded-xl" />
+                      <p className="relative text-sm md:text-base leading-relaxed whitespace-pre-wrap text-gray-700 dark:text-gray-200 font-medium">
                         {result.greekMythStory}
                       </p>
                     </motion.div>
@@ -821,9 +1050,9 @@ export default function Home() {
 
                   {/* 로또 번호 */}
                   <div className="space-y-4">
-                    <h3 className="flex items-center gap-3 text-lg font-bold">
-                      <div className="p-2 rounded-lg bg-accent/10">
-                        <Trophy className="h-5 w-5 text-accent" />
+                    <h3 className="flex items-center gap-3 text-lg font-bold text-gray-700 dark:text-gray-200">
+                      <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                        <Trophy className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                       </div>
                       <span>추천 로또 번호</span>
                     </h3>
@@ -938,12 +1167,11 @@ export default function Home() {
 
                   {/* 분류 결과 */}
                   <div className="space-y-5">
-                    <h3 className="flex items-center gap-3 text-lg font-black">
-                      <div className="relative p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20 shadow-lg">
-                        <div className="absolute inset-0 bg-primary/10 rounded-xl blur-sm" />
-                        <BookOpen className="relative h-6 w-6 text-primary drop-shadow-md" />
+                    <h3 className="flex items-center gap-3 text-lg font-black text-gray-700 dark:text-gray-200">
+                      <div className="relative p-2.5 rounded-xl bg-gradient-to-br from-purple-200 to-purple-100 dark:from-purple-800/30 dark:to-purple-700/20 border border-purple-300 dark:border-purple-600 shadow-lg">
+                        <BookOpen className="relative h-6 w-6 text-purple-600 dark:text-purple-400" />
                       </div>
-                      <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                      <span className="text-gray-700 dark:text-gray-200">
                         동양사상 기반 분류
                       </span>
                     </h3>
@@ -954,20 +1182,20 @@ export default function Home() {
                           initial={{ opacity: 0, x: -20, scale: 0.95 }}
                           animate={{ opacity: 1, x: 0, scale: 1 }}
                           transition={{ delay: index * 0.1, type: "spring", stiffness: 100 }}
-                          className="relative group rounded-xl border-2 border-border/50 bg-gradient-to-br from-muted/50 via-muted/30 to-muted/20 backdrop-blur-sm p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-primary/30"
+                          className="relative group rounded-xl border-2 border-purple-200 dark:border-purple-700 bg-gradient-to-br from-purple-50/50 via-white to-purple-50/50 dark:from-purple-900/20 dark:via-gray-800 dark:to-purple-900/20 backdrop-blur-sm p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-purple-400 dark:hover:border-purple-500"
                         >
                           {/* 호버 시 글로우 */}
-                          <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-300/20 to-purple-400/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex-1">
-                              <p className="font-medium text-sm">{item.category}</p>
-                              <p className="text-xs text-muted-foreground mt-1">{item.reason}</p>
+                              <p className="font-medium text-sm text-gray-700 dark:text-gray-200">{item.category}</p>
+                              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{item.reason}</p>
                             </div>
                             <div className="text-right">
-                              <div className="text-2xl font-bold text-primary">{item.confidence}%</div>
-                              <div className="w-20 h-2 bg-muted rounded-full overflow-hidden mt-1">
+                              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{item.confidence}%</div>
+                              <div className="w-20 h-2 bg-purple-100 dark:bg-purple-900/50 rounded-full overflow-hidden mt-1">
                                 <motion.div
-                                  className="h-full bg-primary rounded-full"
+                                  className="h-full bg-gradient-to-r from-purple-500 to-purple-600 rounded-full"
                                   initial={{ width: 0 }}
                                   animate={{ width: `${item.confidence}%` }}
                                   transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -990,7 +1218,7 @@ export default function Home() {
                     <Button
                       onClick={handleReset}
                       variant="outline"
-                      className="w-full border-2 hover:bg-primary/5 hover:border-primary/50 transition-all duration-300 font-semibold"
+                      className="w-full border-2 border-purple-300 dark:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/30 hover:border-purple-400 dark:hover:border-purple-500 transition-all duration-300 font-semibold text-purple-600 dark:text-purple-400"
                       size="lg"
                     >
                       새로운 꿈 해석하기
